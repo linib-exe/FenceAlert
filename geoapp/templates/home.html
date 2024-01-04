@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Shop Details{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-lg">
+        {% if request.user.is_superuser %}
+            <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">Shop Details</h1>
+
+            <!-- Add New Shop Button -->
+            <button
+                class="bg-blue-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+                onclick="window.location.href='createshop'">Add New Shop</button>
+
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-3 text-left">S.No.</th>
+                            <th class="py-2 px-3 text-left">Shop Name</th>
+                            <th class="py-2 px-3 text-left">Shop Owner</th>
+                            <th class="py-2 px-3 text-left">Contact</th>
+                            <th class="py-2 px-3 text-left">Actions</th> <!-- New column for Actions -->
+                        </tr>
+                    </thead>
+                    <tbody class="space-y-2">
+                        {% for shop in shops %}
+                            <tr>
+                                <td class="py-2 px-3">{{ forloop.counter }}</td>
+                                <td class="py-2 px-3"><a href="{% url 'shopDetail' shop.pk %}">{{ shop.shopName }}</a></td>
+                                <td class="py-2 px-3">{{ shop.shopOwner }}</td>
+                                <td class="py-2 px-3">{{ shop.shopContact }}</td>
+                                <td class="py-2 px-3">
+                                    <!-- Edit Button with FontAwesome Edit Icon -->
+                                    <a class="edit-button bg-transparent text-gray-500 hover:text-blue-500 focus:outline-none"
+                                        href="{% url 'editshop' shop.pk %}">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </a>
+                                    <!-- Delete Button with FontAwesome Trash Icon -->
+                                    <a class="delete-button bg-transparent text-gray-500 hover:text-red-500 focus:outline-none"
+                                        href="{% url 'deleteshop' shop.pk %}">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">My Product Details</h1>
+            <!-- Add New Product Button for non-superusers -->
+            <button
+                class="bg-blue-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
+                onclick="window.location.href='addproduct'">Add New Product</button>
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-3 text-left">S.No.</th>
+                            <th class="py-2 px-3 text-left">Product Name</th>
+                            <th class="py-2 px-3 text-left">Product Price</th>
+                            <th class="py-2 px-3 text-left">Product Owner</th>
+                            <th class="py-2 px-3 text-left">Offers</th>
+                            <th class="py-2 px-3 text-left">Actions</th> <!-- New column for Actions -->
+                        </tr>
+                    </thead>
+                    <tbody class="">
+                        {% for product in products %}
+                            <tr class="p-5">
+                                <td class="py-2 px-3">{{ forloop.counter }}</td>
+                                <td class="py-2 px-3"><a href="">{{ product.productName }}</a></td>
+                                <td class="py-2 px-3">{{ product.productPrice }}</td>
+                                <td class="py-2 px-3">{{ product.productOwner }}</td>
+                                <td class="py-2 px-4 whitespace-normal text-center"><a href="{%url 'ProductOffer' product.pk%}" class="text-blue-500 hover:text-blue-300">{{product.offer_set.all.count}}</a></td>
+                                <td class="py-2 px-3">
+                                    <!-- Edit Button with FontAwesome Edit Icon -->
+                                    <a class="edit-button bg-transparent text-gray-500 hover:text-blue-500 focus:outline-none"
+                                        href="">
+                                        <i class="fa-solid fa-edit"></i>
+                                    </a>
+                                    <!-- Delete Button with FontAwesome Trash Icon -->
+                                    <a class="delete-button bg-transparent text-gray-500 hover:text-red-500 focus:outline-none"
+                                        href="">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                    <a href="{%url 'createOffer' product.id%}"
+                                        class="text-blue-500">Create Offers</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

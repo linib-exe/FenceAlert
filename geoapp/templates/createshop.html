@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Create a New Shop{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold text-center mb-6 text-blue-500">Create a New Shop</h1>
+
+        <form method="post" class="space-y-4" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label for="shopName" class="block text-sm font-semibold text-gray-600">Shop Name:</label>
+                <input type="text" id="shopName" name="shopName"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                    placeholder="Enter Shop Name" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="shopOwner" class="block text-sm font-semibold text-gray-600">Shop Owner:</label>
+                <input type="text" id="shopOwner" name="shopOwner"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                    placeholder="Enter Shop Owner" value="Blank">
+            </div>
+
+            <div class="mb-4">
+                <label for="shopContact" class="block text-sm font-semibold text-gray-600">Shop Contact:</label>
+                <input type="text" id="shopContact" name="shopContact"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                    placeholder="Enter Shop Contact" value="9999999999">
+            </div>
+
+            <div class="mb-4">
+                <label for="Username" class="block text-sm font-semibold text-gray-600">Username:</label>
+                <input type="text" id="Username" name="Username"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                    placeholder="Username" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="Password" class="block text-sm font-semibold text-gray-600">Password:</label>
+                <input type="password" id="Password" name="Password"
+                    class="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+                    placeholder="Password" required>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
+                Save
+            </button>
+        </form>
+    </div>
+{% endblock %}
