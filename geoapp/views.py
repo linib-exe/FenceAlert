@@ -6,6 +6,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout,login,authenticate
 from django.contrib import messages
 from django.contrib import messages
+from rest_framework import generics
+from .serializers import OfferSerializer
+
+
 
 # Create your views here.
 @login_required(login_url='login')
@@ -143,3 +147,25 @@ def ProductOffer(request,pk):
     product = Product.objects.get(pk = pk)
     offers = Offer.objects.filter(product = product)
     return render(request,'ProductOffer.html',{'offers':offers,'product':product})
+
+
+def OfferByShop(request,pk): 
+    shop = Shop.objects.get(pk = pk)
+    offers = Offer.objects.filter(shop = shop)
+
+    return render(request,'Offer.html',{"offers":offers})
+
+
+class OfferByProductView(generics.ListAPIView):
+    serializer_class = OfferSerializer
+
+    def get_queryset(self):
+        product_id = self.kwargs['product_id']
+        return Offer.objects.filter(product_id=product_id)
+
+class OfferByShopView(generics.ListAPIView):
+    serializer_class = OfferSerializer
+
+    def get_queryset(self):
+        shop_id = self.kwargs['shop_id']
+        return Offer.objects.filter(offeredby_id=shop_id)
