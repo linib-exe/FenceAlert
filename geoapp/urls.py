@@ -12,5 +12,8 @@ urlpatterns = [
     path('addproduct/',views.addproduct,name='addproduct'),
     path('logout/',views.logoutuser,name='logout'),
     path('createoffer/<int:pk>',views.createOffer,name='createOffer'),
-    path('productoffer/<int:pk>',views.ProductOffer,name='ProductOffer')
+    path('productoffer/<int:pk>',views.ProductOffer,name='ProductOffer'),
+    path('offer/<int:pk>/',views.OfferByShop,name='offer'),
+    path('offers/by-product/<int:product_id>/', views.OfferByProductView.as_view(), name='offer-by-product'),
+    path('offers/by-shop/<int:shop_id>/', views.OfferByShopView.as_view(), name='offer-by-shop'),
 ]
