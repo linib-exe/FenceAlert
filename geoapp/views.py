@@ -7,10 +7,13 @@ from django.contrib.auth import logout,login,authenticate
 from django.contrib import messages
 from django.contrib import messages
 from rest_framework import generics
-from .serializers import OfferSerializer
+from rest_framework.response import Response
+from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer
+from django.db.models import F
+from rest_framework.views import APIView
 
-
-
+def pingPage(request):
+    return JsonResponse({'status':'OK'},safe=False)
 # Create your views here.
 @login_required(login_url='login')
 def home(request):
@@ -168,4 +171,184 @@ class OfferByShopView(generics.ListAPIView):
 
     def get_queryset(self):
         shop_id = self.kwargs['shop_id']
-        return Offer.objects.filter(offeredby_id=shop_id)
+        return Offer.objects.filter(offeredby_id=shop_id).select_related('product')
+
+from django.http import JsonResponse
+import time
+def productView(request):
+    data = [
+  {
+    "name": "Widget A",
+    "markedPrice": 25.0,
+    "salePrice": 19.99,
+    "shopName": "Tech Emporium"
+  },
+  {
+    "name": "Gadget X",
+    "markedPrice": 45.0,
+    "salePrice": 39.99,
+    "shopName": "Electro Depot"
+  },
+  {
+    "name": "Super Gizmo",
+    "markedPrice": 30.0,
+    "salePrice": 24.99,
+    "shopName": "Innovation Hub"
+  },
+  {
+    "name": "Tech Marvel",
+    "markedPrice": 60.0,
+    "salePrice": 49.99,
+    "shopName": "Digital Haven"
+  }
+]
+    time.sleep(0.5)
+
+    return JsonResponse(data,safe=False)
+
+#TODO: this function calculates distance between two geological coordinates
+from geopy.distance import geodesic
+def calcdistance(lat1,long1,lat2,long2):
+    return geodesic((lat1,long1),(lat2,long2)).meters
+
+class ShopByLocation(APIView):
+    '''
+    Return Shop by nearest location if latitude and longitude given
+ 
+    </code>
+    '''
+    def get(self, request, *args, **kwargs):
+        latitude = request.query_params.get('latitude', None)
+        longitude = request.query_params.get('longitude', None)
+        if latitude is not None and longitude is not None:
+            print('Longitude: ',longitude,'Longitude: ',latitude)
+            user_lat = latitude
+            user_lon = longitude
+            shops = Shop.objects.all()
+            shop_list = []
+            
+            for shop in shops:
+                distance = round(calcdistance(user_lat,user_lon,shop.latitude,shop.longitude),2)
+                shop_with_distance = {}
+                shop_with_distance['id'] = shop.id
+                shop_with_distance['shopName'] = shop.shopName
+                shop_with_distance['shopContact'] = shop.shopContact
+                shop_with_distance['shopOwner'] = shop.shopOwner
+                shop_with_distance['distance'] = distance
+                shop_list.append(shop_with_distance)
+            sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
+            selected_shop = sorted_shop_list[0]
+            serializer = CustomShopSerializer(sorted_shop_list,many=True)
+            #TODO:
+
+            return Response(serializer.data)
+        
+            
+        else :
+            
+            shops = Shop.objects.all()
+            shop_list = []
+            
+            for shop in shops:
+                distance = "0.0"
+                shop_with_distance = {}
+                shop_with_distance['id'] = shop.id
+                shop_with_distance['shopName'] = shop.shopName
+                shop_with_distance['shopContact'] = shop.shopContact
+                shop_with_distance['shopOwner'] = shop.shopOwner
+                shop_with_distance['distance'] = distance
+                shop_list.append(shop_with_distance)
+            sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
+            # selected_shop = sorted_shop_list[0]
+            serializer = CustomShopSerializer(sorted_shop_list,many=True)
+
+
+            # for shop in shops:
+            #     print(shop.distance)
+
+            return Response(serializer.data)
+
+        
+class OffersByLocation(APIView):
+    def get(self, request, *args, **kwargs):
+        latitude = request.query_params.get('latitude', None)
+        longitude = request.query_params.get('longitude', None)
+        if latitude is not None and longitude is not None:
+            print('Longitude: ',longitude,'Longitude: ',latitude)
+
+            user_lat = latitude
+            user_lon = longitude
+            shops = Shop.objects.all()
+            shop_list = []
+            
+            for shop in shops:
+                distance = round(calcdistance(user_lat,user_lon,shop.latitude,shop.longitude),2)
+                shop_with_distance = {}
+                shop_with_distance['id'] = shop.id
+                shop_with_distance['shopName'] = shop.shopName
+                shop_with_distance['shopContact'] = shop.shopContact
+                shop_with_distance['shopOwner'] = shop.shopOwner
+                shop_with_distance['distance'] = distance
+                shop_list.append(shop_with_distance)
+            sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
+            selected_shop = sorted_shop_list[0]
+            offers = Offer.objects.filter(offeredby_id=selected_shop['id']).select_related('product','offeredby')
+
+            offers_list = []
+            for offer in offers:
+                offer_obj = {}
+                offer_obj['id'] = offer.id
+                offer_obj['productName'] = offer.product.productName
+                offer_obj['offerTitle'] = offer.offerTitle
+                offer_obj['offerPrice'] = offer.offerprice
+                offer_obj['originalPrice'] = offer.product.productPrice
+                offer_obj['shopName'] = offer.offeredby.shopName
+                offer_obj['productImage'] = offer.product.productImage
+                offers_list.append(offer_obj)
+            serializer = CustomOfferSerializer(offers_list,many=True)
+            offerdata = serializer.data
+            response_data = {}
+            response_data['shop_distance'] = selected_shop['distance']
+            response_data['offers'] = offerdata
+            return Response(response_data)
+
+        #TODO:
+        else:
+            user_lat = "26.797206"
+            user_lon = "87.291943"
+            shops = Shop.objects.all()
+            shop_list = []
+            
+            for shop in shops:
+                distance = calcdistance(user_lat,user_lon,shop.latitude,shop.longitude)
+                shop_with_distance = {}
+                shop_with_distance['id'] = shop.id
+                shop_with_distance['shopName'] = shop.shopName
+                shop_with_distance['shopContact'] = shop.shopContact
+                shop_with_distance['shopOwner'] = shop.shopOwner
+                shop_with_distance['distance'] = distance
+                shop_list.append(shop_with_distance)
+            sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
+            selected_shop = sorted_shop_list[0]
+            offers = Offer.objects.filter(offeredby_id=selected_shop['id']).select_related('product','offeredby')
+
+            offers_list = []
+            for offer in offers:
+                offer_obj = {}
+                offer_obj['id'] = offer.id
+                offer_obj['productName'] = offer.product.productName
+                offer_obj['offerTitle'] = offer.offerTitle
+                offer_obj['offerPrice'] = offer.offerprice
+                offer_obj['originalPrice'] = offer.product.productPrice
+                offer_obj['shopName'] = offer.offeredby.shopName
+                offer_obj['productImage'] = offer.product.productImage
+
+                offers_list.append(offer_obj)
+
+            serializer = CustomOfferSerializer(offers_list,many=True)
+            return Response(serializer.data)
+
+
+
+
+

@@ -1,0 +1,5 @@
+fenceenv
+venv
+.DS_Store
+.env
+db.sqlite3

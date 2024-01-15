@@ -9,6 +9,8 @@ class Shop(models.Model):
     shopName = models.CharField(max_length=50)
     shopOwner = models.CharField(max_length=50, default="Blank")
     shopContact = models.CharField(max_length=50, default="9999999999")
+    latitude = models.CharField(max_length=100,default='0.0')
+    longitude = models.CharField(max_length=100,default="0.0")
 
     def __str__(self):
         return self.shopName
@@ -24,6 +26,7 @@ class Product(models.Model):
         ("Drinks","Drinks"),
         ("Furniture","Furniture")
     ))
+    productImage = models.ImageField(upload_to='productImages/',default='productImages/product_placeholder.png',null=True)
 
     def __str__(self):
         return self.productName

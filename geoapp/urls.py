@@ -3,6 +3,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('ping/',views.pingPage,name="pingPage"),
+    path('products/',views.productView,name='product'),
     path('',views.home,name='home'),
     path('createshop/',views.createshop,name='createshop'),
     path('login/',views.loginuser,name='login'),
@@ -16,4 +18,6 @@ urlpatterns = [
     path('offer/<int:pk>/',views.OfferByShop,name='offer'),
     path('offers/by-product/<int:product_id>/', views.OfferByProductView.as_view(), name='offer-by-product'),
     path('offers/by-shop/<int:shop_id>/', views.OfferByShopView.as_view(), name='offer-by-shop'),
+    path('shops/by-location/',views.ShopByLocation.as_view(),name='shopbylocation'),
+    path('offers/by-location/',views.OffersByLocation.as_view(),name='offersbylocation')
 ]
