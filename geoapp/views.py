@@ -124,6 +124,10 @@ def editproduct(request,id):
     }
     return render(request,'editproduct.html',context)
 
+def deleteproduct(request,id):
+    product = Product.objects.get(id=id)
+    product.delete()
+    return redirect('home')
 
 def shopDetail(request,pk): 
     if request.user.is_superuser:

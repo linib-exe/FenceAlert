@@ -86,7 +86,7 @@
                                     </a>
                                     <!-- Delete Button with FontAwesome Trash Icon -->
                                     <a class="delete-button bg-transparent text-gray-500 hover:text-red-500 focus:outline-none"
-                                        href="">
+                                        href="{% url 'deleteproduct' product.id %}">
                                         <i class="fa-solid fa-trash"></i>
                                     </a>
                                     <a href="{%url 'createOffer' product.id%}"
