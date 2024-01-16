@@ -60,6 +60,8 @@
                             <th class="py-2 px-3 text-left">Product Name</th>
                             <th class="py-2 px-3 text-left">Product Price</th>
                             <th class="py-2 px-3 text-left">Product Owner</th>
+                            <th class="py-2 px-3 text-left">Product Image</th>
+
                             <th class="py-2 px-3 text-left">Offers</th>
                             <th class="py-2 px-3 text-left">Actions</th> <!-- New column for Actions -->
                         </tr>
@@ -71,11 +73,15 @@
                                 <td class="py-2 px-3"><a href="">{{ product.productName }}</a></td>
                                 <td class="py-2 px-3">{{ product.productPrice }}</td>
                                 <td class="py-2 px-3">{{ product.productOwner }}</td>
+                                <td class="py-2 px-3">
+                                    <img src="{% if product.productImage%}{{product.productImage.url}} {% else %} {{'productImages/product_placeholder.png'}} {% endif %}"  style="width: 100px; height: 80px;" alt="{{product.productName}}">
+                                </td>
+
                                 <td class="py-2 px-4 whitespace-normal text-center"><a href="{%url 'ProductOffer' product.pk%}" class="text-blue-500 hover:text-blue-300">{{product.offer_set.all.count}}</a></td>
                                 <td class="py-2 px-3">
                                     <!-- Edit Button with FontAwesome Edit Icon -->
                                     <a class="edit-button bg-transparent text-gray-500 hover:text-blue-500 focus:outline-none"
-                                        href="">
+                                        href="{% url 'editproduct'  product.id %}">
                                         <i class="fa-solid fa-edit"></i>
                                     </a>
                                     <!-- Delete Button with FontAwesome Trash Icon -->

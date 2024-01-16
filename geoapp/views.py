@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer
 from django.db.models import F
 from rest_framework.views import APIView
-
+from .forms import ShopForm,ProductForm
 def pingPage(request):
     return JsonResponse({'status':'OK'},safe=False)
 # Create your views here.
@@ -29,20 +29,26 @@ def home(request):
 @login_required(login_url='login')
 def createshop(request):
     if request.user.is_superuser:
+        # form = ShopForm()
         if request.method == 'POST':
             shopName = request.POST.get('shopName')
             shopOwner = request.POST.get('shopOwner')
             shopContact = request.POST.get('shopContact')
             username = request.POST.get('Username')
             password = request.POST.get('Password')
-            
+            latitude = request.POST.get('shopLatitude')
+            longitude = request.POST.get('shopLongitude')
             if username !=" " and password != "": 
-                user = User(username = username)
-                user.set_password(password)
-                user.save()
-                if user:
-                    createShop = Shop(user = user,shopName = shopName,shopOwner = shopOwner,shopContact = shopContact)
-                    createShop.save()
+                if not User.objects.filter(username=username).exists():
+                    user = User(username = username)
+                    user.set_password(password)
+                    user.save()
+                    if user:
+                        createShop = Shop(user = user,shopName = shopName,shopOwner = shopOwner,shopContact = shopContact,latitude=latitude,longitude=longitude)
+                        createShop.save()
+                        messages.success(request,'Shop Created')
+                else:
+                     messages.success(request,'Username already taken')
             else:
                 messages.success(request,'Fill username or email')
                 
@@ -66,13 +72,57 @@ def addproduct(request):
         productName = request.POST.get('productName')
         productPrice = request.POST.get('productPrice')
         productCategory = request.POST.get('productCategory')
+        productImage = request.FILES.get('productImage')
         current_shop = request.user.shop
-        Product.objects.create(productName=productName,
-                               productPrice=productPrice,
-                               productCategory=productCategory,
-                               productOwner = current_shop)
+        if productImage is not None:
+            Product.objects.create(productName=productName,
+                                productPrice=productPrice,
+                                productCategory=productCategory,
+                                productOwner = current_shop,productImage=productImage)
+        else:
+            Product.objects.create(productName=productName,
+                                productPrice=productPrice,
+                                productCategory=productCategory,
+                                productOwner = current_shop,)
+
         return redirect('home')
     return render(request,'addproduct.html')
+
+
+@login_required(login_url='login')
+def editproduct(request,id):
+    product = Product.objects.get(id=id)
+    form = ProductForm(instance = product)
+    if request.method == 'POST':
+        form = ProductForm(request.POST,request.FILES,instance=product)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.productOwner = request.user.shop
+            product.save()      
+            messages.success(request,'Product Updated')
+        # productName = request.POST.get('productName')
+        # productPrice = request.POST.get('productPrice')
+        # productCategory = request.POST.get('productCategory')
+        # productImage = request.FILES.get('productImage')
+        # current_shop = request.user.shop
+        # if productImage is not None:
+        #     print('image yes')
+        #     Product.objects.create(productName=productName,
+        #                         productPrice=productPrice,
+        #                         productCategory=productCategory,
+        #                         productOwner = current_shop,productImage=productImage)
+        # else:
+        #     print('no image')
+        #     Product.objects.create(productName=productName,
+        #                         productPrice=productPrice,
+        #                         productCategory=productCategory,
+        #                         productOwner = current_shop,)
+        return redirect('home')
+    context = {
+        'form':form,
+        'product':product
+    }
+    return render(request,'editproduct.html',context)
 
 
 def shopDetail(request,pk): 
@@ -93,7 +143,10 @@ def editshop(request,pk):
             shop.shopName = request.POST.get('shopName')
             shop.shopOwner = request.POST.get('shopOwner')
             shop.shopContact = request.POST.get('shopContact')
+            shop.latitude = request.POST.get('shopLatitude')
+            shop.longitude = request.POST.get('shopLongitude')
             shop.save()
+            messages.success(request,'Shop Updated')
             return redirect('home')
         return render(request,'editshop.html',{'shop':shop})
     else:
