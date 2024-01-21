@@ -8,3 +8,4 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Shop,ShopAdmin)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Offer)
+admin.site.register(Mall)

@@ -377,7 +377,7 @@ class ShopByLocation(APIView):
         latitude = request.query_params.get('latitude', None)
         longitude = request.query_params.get('longitude', None)
         if latitude is not None and longitude is not None:
-            print('Longitude: ',longitude,'Longitude: ',latitude)
+            print('Longitude: ',longitude,'Latitude: ',latitude)
             user_lat = latitude
             user_lon = longitude
             shops = Shop.objects.all()
@@ -434,9 +434,36 @@ class OffersByLocation(APIView):
 
             user_lat = latitude
             user_lon = longitude
-            shops = Shop.objects.all()
-            shop_list = []
-            
+            # shops = Shop.objects.all()
+            # shop_list = []
+            #TODO: find the mall and check within mall fence area
+            malls = Mall.objects.all()
+            mall_list = [] # list of mall 
+            for mall in malls:
+                
+                user_mall_distance = round(calcdistance(user_lat,user_lon,mall.latitude,mall.longitude),2)
+                print(user_mall_distance)
+                # select the mall where the user is inside the fence
+                if mall.fence_radius >= user_mall_distance:
+                    #then add the mall to list
+                    mall_with_distance = {
+
+                    }
+                    mall_with_distance['id'] = mall.id
+                    mall_with_distance['mallName'] = mall.mallName
+                    mall_with_distance['mallAddress'] = mall.mallAddress
+                    mall_with_distance['fence_radius'] = mall.fence_radius
+                    mall_with_distance['user_mall_distance'] = user_mall_distance
+                    mall_list.append(mall_with_distance)
+            if not len(mall_list)>0:
+                return Response({'status':'error','message':'OUTSIDE THE MALL AREA'})
+                
+            sorted_mall_list = sorted(mall_list, key=lambda x: float(x['user_mall_distance']))
+            # select the mall with least distance from the user
+            selected_mall = sorted_mall_list[0] 
+            selected_mall_object  = Mall.objects.get(id=selected_mall['id'])
+            shops = Shop.objects.filter(mall = selected_mall_object)
+            shop_list = [] # empty list of shops
             for shop in shops:
                 distance = round(calcdistance(user_lat,user_lon,shop.latitude,shop.longitude),2)
                 shop_with_distance = {}
@@ -464,7 +491,10 @@ class OffersByLocation(APIView):
             serializer = CustomOfferSerializer(offers_list,many=True)
             offerdata = serializer.data
             response_data = {}
+            response_data['status'] = 'OK'
+            response_data['message'] = "INSIDE MALL"
             response_data['shop_distance'] = selected_shop['distance']
+            print(selected_shop['shopName'])
             response_data['offers'] = offerdata
             return Response(response_data)
 
@@ -502,7 +532,10 @@ class OffersByLocation(APIView):
                 offers_list.append(offer_obj)
 
             serializer = CustomOfferSerializer(offers_list,many=True)
-            return Response(serializer.data)
+            response_data['status'] = 'OK'
+            response_data['message'] = "USING DEFALUT LAT LONG"
+            response_data['offers'] = serializer.data
+            return Response(response_data)
 
 
 
