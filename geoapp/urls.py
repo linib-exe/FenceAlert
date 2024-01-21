@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+
     path('ping/',views.pingPage,name="pingPage"),
     path('products/',views.productView,name='product'),
     path('',views.home,name='home'),
@@ -21,5 +22,13 @@ urlpatterns = [
     path('offers/by-product/<int:product_id>/', views.OfferByProductView.as_view(), name='offer-by-product'),
     path('offers/by-shop/<int:shop_id>/', views.OfferByShopView.as_view(), name='offer-by-shop'),
     path('shops/by-location/',views.ShopByLocation.as_view(),name='shopbylocation'),
-    path('offers/by-location/',views.OffersByLocation.as_view(),name='offersbylocation')
+    path('offers/by-location/',views.OffersByLocation.as_view(),name='offersbylocation'),
+
+
+    path('createmall/',views.createMall,name='createmall'),
+    path('viewmall/<int:mall_id>/',views.viewMall,name="viewmall"),
+    path('listmall/',views.listMall,name='listmall'),
+    path('addshopbymall/<int:mall_id>/',views.addshopbymall,name='addshopbymall'),
+    path('getlocation/',views.LocationAPI.as_view(),name='getlocation'),
+     path('shopsbymall/',views.shopsbymall,name='shopsbymall')
 ]

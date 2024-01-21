@@ -1,0 +1,126 @@
+{%  extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
+  <div class="flex md:flex-row flex-col">
+    <div class="w-4/12 ">
+        <h1 class="text-3xl font-bold mb-4">Mall Information</h1>
+    
+        <!-- Mall Name -->
+        <div class="mb-4">
+          <label class="block text-gray-600 font-bold">Mall Name:</label>
+          <p class="text-lg text-gray-800 font-semibold">{{mall.mallName}}</p>
+        </div>
+    
+        <!-- Mall Address -->
+        <div class="mb-4">
+          <label class="block text-gray-600 font-bold">Mall Address:</label>
+          <p class="text-lg text-gray-800">{{mall.mallAddress}}</p>
+        </div>
+    
+        <!-- Number of Shops -->
+        <div class="mb-4">
+          <label class="block text-gray-600 font-bold">Number of Shops:</label>
+          <p class="text-lg text-gray-800">{{mall.shops.count}}</p>
+        </div>
+        <!-- Fence Distance -->
+        <div class="mb-4">
+            <label class="block text-gray-600 font-bold">Fence Radius</label>
+            <p class="text-lg text-gray-800" title="Fence Radius : {{mall.fence_radius}} meters">{{mall.fence_radius}} M</p>
+          </div>
+    
+        <!-- Back Button (Optional) -->
+        <a href="{% url 'listmall' %}" class="text-blue-500 hover:underline">Back to Mall List</a>
+    </div>
+
+
+    <div class="w-8/12">
+        <div id="map" style="width: 100%; height: 600px;" class="rounded-lg "></div>
+      </div>
+  </div>
+  
+  </div>
+
+
+  <script>
+var mall_id = {{mall.id}};
+var mallName = "{{mall.mallName}}";
+var userlatitude = {{mall.latitude}};
+var userlongitude = {{mall.longitude}};
+var mall_location = "{{mall.mallAddress}}";
+var fence_radius = {{mall.fence_radius}};
+var map = L.map('map', {
+    center: [userlatitude,userlongitude],
+    zoom: 16
+});
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+var marker;
+var usermarker
+var radius_layer;
+var distance_line;
+marker = L.marker([userlatitude, userlongitude]).addTo(map)
+    .bindPopup(`<p class="text-lg font-bold"> ${mallName} </p> ${mall_location}`)
+    .openPopup();
+radius_layer = L.circle([userlatitude, userlongitude], {radius:fence_radius}).addTo(map);
+    
+
+
+map.on('click',(event)=>{
+
+    if(usermarker){
+        map.removeLayer(usermarker)
+    }
+    if(distance_line){
+        map.removeLayer(distance_line)
+    }
+
+    if(map.distance([userlatitude,userlongitude],event.latlng)>fence_radius){
+        console.log('Shops cant be outside the fence')
+        alert("Shops can't be outside the mall fence")
+        return ;
+    }
+    usermarker = L.marker([event.latlng.lat, event.latlng.lng]).addTo(map)
+    .bindPopup(`
+    <a class="px-2 py-1 text-sm text-white bg-green-500 rounded-xl" href="/addshopbymall/${mall_id}/?lat=${event.latlng.lat}&long=${event.latlng.lng}">Add Shop</a>
+    ${event.latlng.lat},${event.latlng.lng}`)
+    .openPopup();
+    // distance_line = L.polygon([event.latlng,[userlatitude,userlongitude]], {color: 'red'}).addTo(map);
+})
+
+document.addEventListener('DOMContentLoaded', function () {
+      // Your JavaScript code goes here
+    getshops();
+      // Example: Display an alert
+     }
+    
+    );
+
+
+async function getshops () {
+    try{
+        const response = await fetch(`/shopsbymall/?mall_id=${mall_id}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json()
+        shops = result.shops;
+        shops.forEach(shop => {
+            L.marker([shop.latitude,shop.longitude]).addTo(map)
+        .bindPopup(`<p>${shop.shopName}</p>`)
+    .openPopup();
+      
+     })
+    }catch (error){
+        console.log(error)
+
+    }
+}
+
+
+  </script>
+{% endblock content %}

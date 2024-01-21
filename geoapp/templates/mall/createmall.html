@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{%  block content %}
+
+<h1>Create Mall</h1>
+<div class="m-4 px-2">
+    <form action="" method="POST">
+{% csrf_token %}
+{{form | crispy }}
+        <button type="submit" class="bg-green-500 text-white px-4 py-2 ">Add Mall</button>
+    </form>
+</div>
+<div id="latlong"></div>
+<div class="mt-8 flex justify-center items-center">
+
+    <div id="map" style="width: 100%; height: 600px;" class="rounded-lg "></div>
+
+</div>
+
+<script>
+
+var userlatitude = 27.1888;
+var userlongitude = 87.38383;
+var map = L.map('map', {
+    center: [userlatitude,userlongitude],
+    zoom: 16
+});
+var marker;
+var radius_layer ;
+var radius;
+var mall_latitude =  document.getElementById('id_latitude')
+var mall_longitude =  document.getElementById('id_longitude')
+var mall_name = document.getElementById('id_mallname')
+var mall_address = document.getElementById('id_mallAddress')
+    // Check if geolocation is available in the browser
+if ("geolocation" in navigator) {
+    // Get the user's current location
+    navigator.geolocation.getCurrentPosition(function(position) {
+        // The user's latitude and longitude are in position.coords.latitude and position.coords.longitude
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        userlatitude = position.coords.latitude;
+        userlongitude = position.coords.longitude;
+        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+        document.getElementById('latlong').innerHTML = `Latitude: ${latitude}, Longitude: ${longitude}`;
+        map.panTo([userlatitude, userlongitude]);
+        fetch(`/getlocation/?latitude=${userlatitude}&longitude=${userlongitude}`).then(response=>response.json()).then(result=>{
+        console.log(result.location);
+      marker =  L.marker([userlatitude, userlongitude]).addTo(map)
+       
+    .bindPopup(`${result.location}`)
+    .openPopup();
+
+    radius = document.getElementById('id_fence_radius').value
+    if(radius){
+        radius_layer = L.circle([userlatitude, userlongitude], {radius:radius}).addTo(map);
+    }
+    else{
+        radius_layer = L.circle([userlatitude, userlongitude], {radius: 300}).addTo(map);
+    }
+   
+    
+    })
+    }, function(error) {
+        // Handle errors, if any
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                console.error("User denied the request for geolocation.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                console.error("Location information is unavailable.");
+                break;
+            case error.TIMEOUT:
+                console.error("The request to get user location timed out.");
+                break;
+            case error.UNKNOWN_ERROR:
+                console.error("An unknown error occurred.");
+                break;
+        }
+    });
+} else {
+    console.error("Geolocation is not available in this browser.");
+}
+
+
+
+
+// var map = L.map('map', {
+//     center: [51.505, -0.09],
+//     zoom: 13
+// });
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+var shopsGroupLayer = L.featureGroup().addTo(map)
+
+
+
+function updatemall(lat,lng,address){
+    mall_latitude.value = lat;
+    mall_longitude.value = lng;
+    if(address){
+        mall_address.value = address;
+    }
+
+}
+map.on('click',(event)=>{
+    
+    console.log(event.latlng);
+    userlatitude = event.latlng.lat;
+    userlongitude = event.latlng.lng;
+
+    if (marker){
+        map.removeLayer(marker);
+    }
+    if(radius_layer){
+        console.log('radius layer removed')
+        map.removeLayer(radius_layer)
+    }
+
+    map.panTo([userlatitude, userlongitude]);
+    
+    fetch(`/getlocation/?latitude=${event.latlng.lat}&longitude=${event.latlng.lng}`).then(response=>response.json()).then(result=>{
+        console.log(result.location);
+
+    updatemall(event.latlng.lat,event.latlng.lng,result.location)
+    marker = L.marker([event.latlng.lat, event.latlng.lng]).addTo(map)
+    .bindPopup(`${result.location}`)
+    .openPopup();
+    })
+    console.log('done fetch')
+   radius = document.getElementById('id_fence_radius').value;
+   console.log(radius)
+   if (radius){
+
+    radius_layer = L.circle([userlatitude, userlongitude], {radius:radius}).addTo(map);
+   }
+   else{
+    radius_layer = L.circle([userlatitude, userlongitude], {radius:400}).addTo(map);
+
+   }
+    
+   
+})
+
+
+
+
+var inputbox = document.getElementById('id_fence_radius')
+inputbox.addEventListener('change',(e)=>{
+
+console.log(inputbox.value)
+radius = inputbox.value
+if(radius_layer){
+        map.removeLayer(radius_layer)
+    }
+radius_layer = L.circle([userlatitude, userlongitude], {radius:radius}).addTo(map);
+
+renderShops();
+})
+
+//function to render shops
+function renderShops(){
+    //function to render shops
+    fetch('/shopsbymall/').then(response=>response.json()).then(result =>{
+    var myshops = result.shops
+    myshops.forEach((shop,index)=>{
+        console.log(shop);
+        L.marker([shop.latitude,shop.longitude]).addTo(shopsGroupLayer)
+        .bindPopup(`<p>${shop.shopName}</p>`)
+    .openPopup();
+    })
+})
+}
+// L.marker([userlatitude, userlongitude]).addTo(map)
+//     .bindPopup('A pretty CSS popup.<br> Easily customizable.')
+//     .openPopup();
+
+
+
+
+/*
+TODO: getting the endpoint and 
+
+ // var angle = 45; // Angle in degrees
+    // var endpoint = L.GeometryUtil.destination(center, angle, radius);
+
+    var textIcon = L.divIcon({
+      className: 'text-icon',
+      html: 'Ranjana MALL'
+    });
+    // Create a marker with the text icon and place it above the line
+    var textMarker = L.marker([userlatitude,userlongitude], { icon: textIcon }).addTo(map);
+   
+*/
+
+</script>
+
+{% endblock content %}

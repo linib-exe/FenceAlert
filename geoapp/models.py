@@ -2,7 +2,14 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 
-
+class Mall(models.Model):
+    mallName = models.CharField(max_length=100)
+    mallAddress = models.CharField(max_length=255,blank=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    fence_radius = models.FloatField(default=500,help_text="Fence Radius in meters(m)") # in meters
+    def __str__(self):
+        return self.mallName
 
 class Shop(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='shop')
@@ -10,8 +17,10 @@ class Shop(models.Model):
     shopOwner = models.CharField(max_length=50, default="Blank")
     shopContact = models.CharField(max_length=50, default="9999999999")
     latitude = models.CharField(max_length=100,default='0.0')
+    mall = models.ForeignKey(Mall,on_delete=models.CASCADE,null=True,blank=True,related_name='shops')
     longitude = models.CharField(max_length=100,default="0.0")
 
+    # fence_radius = models.FloatField()
     def __str__(self):
         return self.shopName
 

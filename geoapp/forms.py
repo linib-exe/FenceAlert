@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import Shop,Product
+from .models import Shop,Product,Mall
 class ShopForm(ModelForm):
     class Meta:
         fields = '__all__'
@@ -12,3 +12,8 @@ class ProductForm(ModelForm):
         exclude = ['productOwner']
         model = Product
 
+
+class MallForm(ModelForm):
+    class Meta:
+        fields = '__all__'
+        model = Mall

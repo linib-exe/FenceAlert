@@ -1,0 +1,47 @@
+{%  extends 'base.html' %}
+
+
+{% block content %}
+
+<h1 class="text-xl font-bold text-center">LIST MALLS IN THE SYSTEM</h1>
+<div class="container mx-auto">
+    <a href="{% url 'createmall' %}" class="px-4 py-2 text-white bg-blue-500 rounded-xl">Create Mall</a>
+</div>
+<div class="container mx-auto mt-8">
+    <table class="min-w-full border border-gray-300">
+      <thead>
+        <tr>
+            <th class="py-2 px-4 border-b">S.N</th>
+          <th class="py-2 px-4 border-b">Mall Name</th>
+          <th class="py-2 px-4 border-b">Fence Radius</th>
+          <th class="py-2 px-4 border-b">Mall Address</th>
+          <th class="py-2 px-4 border-b">No of Shops</th>
+          <th class="py-2 px-4 border-b">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Example row (replace with actual data) -->
+        {% for mall in malls %}
+        <tr>
+        <td class="py-2 px-4 border-b">{{forloop.counter}}</td>
+
+          <td class="py-2 px-4 border-b">{{mall.mallName}}</td>
+          <td class="py-2 px-4 border-b">{{mall.fence_radius}} <span class="font-bold  " title="Meters">M</span></td>
+
+          <td class="py-2 px-4 border-b">{{mall.mallAddress}}</td>
+          <td class="py-2 px-4 border-b">{{mall.shops.count}}</td>
+          <td class="py-2 px-4 border-b">
+            <!-- Add your action buttons or links here -->
+            <a class="bg-green-500 text-white px-4 py-2 rounded" href="{% url 'addshopbymall' mall.id %}">Add Shop</a>
+            <a class="bg-red-500 text-white px-4 py-2 rounded" href="{% url 'viewmall' mall.id %}">View Mall</a>
+
+            <button class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
+            <button class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}

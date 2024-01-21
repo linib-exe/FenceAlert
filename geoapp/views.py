@@ -11,7 +11,10 @@ from rest_framework.response import Response
 from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer
 from django.db.models import F
 from rest_framework.views import APIView
-from .forms import ShopForm,ProductForm
+from .forms import ShopForm,ProductForm,MallForm
+
+from .utils import calcdistance,getlocation
+
 def pingPage(request):
     return JsonResponse({'status':'OK'},safe=False)
 # Create your views here.
@@ -25,6 +28,106 @@ def home(request):
         shop = Shop.objects.get(user = user)
         products = Product.objects.filter(productOwner = shop)
         return render(request,'home.html',{'products':products})
+
+
+def listMall(request):
+    malls = Mall.objects.all()
+    context = {
+        'malls':malls
+    }
+    return render(request,'mall/listmall.html',context)
+
+def viewMall(request,mall_id):
+    mall = Mall.objects.get(id=mall_id)
+    shops = mall.shops.all()
+    context = {
+        'mall':mall,
+        'shops':shops
+    }
+    return render(request,'mall/viewmall.html',context)
+def createMall(request):
+    form = MallForm()
+    if request.method == "POST":
+        form = MallForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('listmall')
+    context = {'form':form}
+    return render(request,'mall/createmall.html',context)
+
+
+
+def addshopbymall(request,mall_id):
+    
+    if request.method == 'POST':
+        shopName = request.POST.get('shopName')
+        shopOwner = request.POST.get('shopOwner')
+        shopContact = request.POST.get('shopContact')
+        username = request.POST.get('Username')
+        password = request.POST.get('Password')
+        latitude = request.POST.get('shopLatitude')
+        longitude = request.POST.get('shopLongitude')
+        if username !=" " and password != "": 
+            if not User.objects.filter(username=username).exists():
+                user = User(username = username)
+                user.set_password(password)
+                user.save()
+                if user:
+                    createShop = Shop(user = user,shopName = shopName,shopOwner = shopOwner,shopContact = shopContact,latitude=latitude,longitude=longitude,mall_id=mall_id)
+                    createShop.save()
+                    messages.success(request,'Shop Created')
+                    return redirect('listmall')
+            else:
+                    messages.success(request,'Username already taken')
+        else:
+            messages.success(request,'Fill username or email')
+
+    mall = Mall.objects.get(id=mall_id)
+    shops = mall.shops.all()
+    lat = request.GET.get('lat')
+    long = request.GET.get('long')
+    coordinates = False
+    if lat is not None and long is not None:
+        coordinates = True
+    context = {
+       'coordinates':coordinates,
+        'lat':lat,
+        'long':long,
+        'mall':mall,
+        'shops':shops
+    }
+    return render(request,'mall/addshop.html',context)
+
+def shopsbymall(request):
+    mall_id = request.GET.get('mall_id')
+    if mall_id is not None:
+         shops = Shop.objects.filter(mall_id=mall_id)
+    else:
+        shops = Shop.objects.all()
+   
+    shops_list = []
+    for shop in shops:
+        shop_obj = {
+            'shopName':shop.shopName,
+            'latitude':shop.latitude,
+            'longitude':shop.longitude,
+        }
+        shops_list.append(shop_obj)
+
+    
+    return JsonResponse(data={'shops':shops_list})
+    
+
+class LocationAPI(APIView):
+     def get(self, request, *args, **kwargs):
+        latitude = request.query_params.get('latitude', None)
+        longitude = request.query_params.get('longitude', None)
+        if latitude is not None and longitude is not None:
+            print('Longitude: ',longitude,'Longitude: ',latitude)
+            location = getlocation(lat=latitude,long=longitude)
+            return Response({'location':location})
+
+
 
 @login_required(login_url='login')
 def createshop(request):
@@ -263,10 +366,6 @@ def productView(request):
 
     return JsonResponse(data,safe=False)
 
-#TODO: this function calculates distance between two geological coordinates
-from geopy.distance import geodesic
-def calcdistance(lat1,long1,lat2,long2):
-    return geodesic((lat1,long1),(lat2,long2)).meters
 
 class ShopByLocation(APIView):
     '''
