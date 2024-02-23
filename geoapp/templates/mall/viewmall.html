@@ -62,7 +62,7 @@ var marker;
 var usermarker
 var radius_layer;
 var distance_line;
-marker = L.marker([userlatitude, userlongitude]).addTo(map)
+marker = L.marker([userlatitude, userlongitude],{icon:mall_icon}).addTo(map)
     .bindPopup(`<p class="text-lg font-bold"> ${mallName} </p> ${mall_location}`)
     .openPopup();
 radius_layer = L.circle([userlatitude, userlongitude], {radius:fence_radius}).addTo(map);
@@ -110,7 +110,7 @@ async function getshops () {
         const result = await response.json()
         shops = result.shops;
         shops.forEach(shop => {
-            L.marker([shop.latitude,shop.longitude]).addTo(map)
+            L.marker([shop.latitude,shop.longitude],{icon:shop_icon}).addTo(map)
         .bindPopup(`<p>${shop.shopName}</p>`)
     .openPopup();
       

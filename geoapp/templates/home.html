@@ -8,9 +8,9 @@
             <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">Shop Details</h1>
 
             <!-- Add New Shop Button -->
-            <button
+            <!-- <button
                 class="bg-blue-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"
-                onclick="window.location.href='createshop'">Add New Shop</button>
+                onclick="window.location.href='createshop'">Add New Shop</button> -->
 
             <div class="overflow-x-auto mt-6">
                 <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
@@ -48,7 +48,104 @@
                 </table>
             </div>
         {% else %}
-            <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">My Product Details</h1>
+            <div>
+
+            </div>
+
+
+
+
+            <div class="container mx-auto mt-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <!-- Shop 1 Chart -->
+                    <div class=" p-6 rounded-lg shadow-lg text-black">
+                        <h2 class="text-xl  font-bold mb-4">{{request.user.shop}}</h2>
+                        <canvas id="shop1Chart" width="400" height="200"></canvas>
+                    </div>
+                    <div class=" p-6 rounded-lg shadow-lg text-black">
+                        <h2 class="text-xl  font-bold mb-4">{{request.user.shop}}</h2>
+                        <canvas id="shop2Chart" width="400" height="200"></canvas>
+                    </div>
+                    <div class=" p-6 rounded-lg shadow-lg text-black">
+                        <h2 class="text-xl  font-bold mb-4">{{request.user.shop}}</h2>
+                        <canvas id="shop3Chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+      
+      
+      <script>
+
+
+
+
+
+
+const shopData = {
+        shop1: { totalProducts: 100, totalOffers: 50, impressions: 200 },
+        shop2: { totalProducts: 80, totalOffers: 50, impressions: 100 },
+        shop3: { totalProducts: 120, totalOffers: 75, impressions: 800 },
+    };
+
+
+    // function createShopChart(shopId, data) {
+    //           const ctx = document.getElementById(`${shopId}Chart`).getContext('2d');
+    //     new Chart(ctx, {
+    //         type: 'bar',
+    //         data: {
+    //             labels: ['Total Products', 'Total Offers', 'Impressions'],
+    //             datasets: [{
+    //                 label: `${shopId} Data`,
+    //                 backgroundColor: ['#454737', 'rgba(255, 205, 86, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+    //                 borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 205, 86, 1)', 'rgba(255, 99, 132, 1)'],
+    //                 borderWidth: 1,
+    //                 data: [data.totalProducts, data.totalOffers, data.impressions],
+    //             }],
+    //         },
+    //         options: {
+    //             scales: {
+    //                 y: {
+    //                     beginAtZero: true,
+    //                 },
+    //             },
+    //         },
+    //     });
+    // }
+
+    function createShopChart(shopId, data) {
+    const ctx = document.getElementById(`${shopId}Chart`).getContext('2d');
+    new Chart(ctx, {
+        type: 'line', // Change type to 'line'
+        data: {
+            labels: ['Total Products', 'Total Offers', 'Impressions'],
+            datasets: [{
+                label: `${shopId} Data`,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Background color for the line area
+                borderColor: 'rgba(255, 99, 132, 1)', // Line color
+                borderWidth: 1,
+                pointBackgroundColor: 'rgba(255, 99, 132, 1)', // Point color
+                data: [data.totalProducts, data.totalOffers, data.impressions],
+            }],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+}
+
+
+
+
+        createShopChart('shop1', shopData.shop1);
+    createShopChart('shop2', shopData.shop2);
+    createShopChart('shop3', shopData.shop3);
+      </script>
+            <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">{{request.user.shop}}</h1>
+
             <!-- Add New Product Button for non-superusers -->
             <button
                 class="bg-blue-500 text-white py-2 px-4 rounded-md transition duration-300 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue"

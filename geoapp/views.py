@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib import messages
 from rest_framework import generics
 from rest_framework.response import Response
-from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer
+from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer,MallSerializer
 from django.db.models import F
 from rest_framework.views import APIView
 from .forms import ShopForm,ProductForm,MallForm
@@ -367,6 +367,15 @@ def productView(request):
     return JsonResponse(data,safe=False)
 
 
+
+class MallListView(generics.ListAPIView):
+    '''
+    Returns all malls in the system
+    '''
+    queryset = Mall.objects.all()
+    serializer_class = MallSerializer
+    
+
 class ShopByLocation(APIView):
     '''
     Return Shop by nearest location if latitude and longitude given
@@ -532,10 +541,20 @@ class OffersByLocation(APIView):
                 offers_list.append(offer_obj)
 
             serializer = CustomOfferSerializer(offers_list,many=True)
+            response_data = {}
             response_data['status'] = 'OK'
             response_data['message'] = "USING DEFALUT LAT LONG"
             response_data['offers'] = serializer.data
             return Response(response_data)
+        
+
+class RecordImpression(APIView):
+
+    def post(self,request,*args,**kwargs):
+        print(request.data)
+        return Response(data={
+            'status':'OK'
+        })
 
 
 

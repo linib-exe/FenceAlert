@@ -30,5 +30,7 @@ urlpatterns = [
     path('listmall/',views.listMall,name='listmall'),
     path('addshopbymall/<int:mall_id>/',views.addshopbymall,name='addshopbymall'),
     path('getlocation/',views.LocationAPI.as_view(),name='getlocation'),
-     path('shopsbymall/',views.shopsbymall,name='shopsbymall')
+     path('shopsbymall/',views.shopsbymall,name='shopsbymall'),
+     path('malls/',views.MallListView.as_view(),name="mallslist"),
+     path('recordImpression/',views.RecordImpression.as_view(),name="recordimpression")
 ]

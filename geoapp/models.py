@@ -47,4 +47,12 @@ class Offer(models.Model):
     offerprice = models.FloatField()
     is_valid = models.BooleanField(default = False,null = True,blank = True)
 
+
+class OfferImpression(models.Model):
+    offer = models.ForeignKey(Offer,on_delete=models.CASCADE,related_name="impressions")
+    timestamp = models.DateTimeField(auto_now=True,editable=True)
+    status = models.CharField(max_length=20,blank=True)
+    userdevice = models.CharField(max_length=255,blank=True)
+
+
     

@@ -97,8 +97,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var shopsGroupLayer = L.featureGroup().addTo(map)
 
-
-
+var malls;
+var inputbox = document.getElementById('id_fence_radius')
 function updatemall(lat,lng,address){
     mall_latitude.value = lat;
     mall_longitude.value = lng;
@@ -107,11 +107,39 @@ function updatemall(lat,lng,address){
     }
 
 }
+
 map.on('click',(event)=>{
     
     console.log(event.latlng);
     userlatitude = event.latlng.lat;
     userlongitude = event.latlng.lng;
+    if (malls){
+        var errors = [];
+        malls.forEach((mall,index)=>{
+            console.log(map.distance([mall.latitude,mall.longitude],event.latlng))
+            console.log(( parseInt(inputbox.value) + mall.fence_radius))
+            if(map.distance([mall.latitude,mall.longitude],event.latlng)< (parseInt(inputbox.value) + mall.fence_radius)){
+       var  error_distance = parseFloat( (parseInt(inputbox.value) + mall.fence_radius) - map.distance([mall.latitude,mall.longitude],event.latlng) ).toFixed(2)
+        errors.push({
+            'mall':
+            mall.mallName,
+            'distance':error_distance/2
+        })
+        // TODO:
+    }
+        })
+    if (errors.length>0){
+        console.log("Malls fence can't intersect")
+        var error_string = "";
+        errors.forEach((error)=>{error_string += ` ${error.mall} by ${error.distance}m ,`})
+        alert(`Malls fence can't intersect , this position intersects ${error_string}. `)
+        return;
+
+    }
+       
+    }
+    
+
 
     if (marker){
         map.removeLayer(marker);
@@ -149,7 +177,7 @@ map.on('click',(event)=>{
 
 
 
-var inputbox = document.getElementById('id_fence_radius')
+
 inputbox.addEventListener('change',(e)=>{
 
 console.log(inputbox.value)
@@ -159,7 +187,7 @@ if(radius_layer){
     }
 radius_layer = L.circle([userlatitude, userlongitude], {radius:radius}).addTo(map);
 
-renderShops();
+// renderShops();
 })
 
 //function to render shops
@@ -174,7 +202,29 @@ function renderShops(){
     .openPopup();
     })
 })
+
 }
+
+function renderMalls() {
+    fetch('/malls/').then(response=>response.json()).then(result =>{
+         malls = result
+        malls.forEach((mall,index)=>{
+            console.log(mall)
+            const mall_radius_layer = L.circle([mall.latitude, mall.longitude], {radius:mall.fence_radius}).addTo(map);
+            const mall_marker = L.marker([mall.latitude, mall.longitude],{icon:mall_icon}).addTo(map).bindPopup(`${mall.mallName}<br>`).openPopup();
+            if (mall.shops)
+            {
+                mall.shops.forEach((shop,index)=>{
+                    const shop_marker = L.marker([shop.latitude, shop.longitude],{icon:shop_icon}).addTo(map).bindPopup(`${shop.shopName}<br>`).openPopup();
+                })
+            }
+            console.log(mall)
+        })
+    });
+
+}
+
+renderMalls();
 // L.marker([userlatitude, userlongitude]).addTo(map)
 //     .bindPopup('A pretty CSS popup.<br> Easily customizable.')
 //     .openPopup();

@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Offer,Product
+from .models import Offer,Product,Mall,Shop
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -28,3 +28,16 @@ class CustomShopSerializer(serializers.Serializer):
     shopContact = serializers.CharField()
     shopOwner = serializers.CharField()
     distance = serializers.CharField()
+
+class ShopSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Shop
+        fields = '__all__'
+
+class MallSerializer(serializers.ModelSerializer):
+    shops = ShopSerializer(many=True)
+    class Meta:
+        model = Mall
+        fields = '__all__'
+    
