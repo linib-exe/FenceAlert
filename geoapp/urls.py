@@ -17,7 +17,9 @@ urlpatterns = [
     path('deleteproduct/<int:id>/',views.deleteproduct,name="deleteproduct"),
     path('logout/',views.logoutuser,name='logout'),
     path('createoffer/<int:pk>',views.createOffer,name='createOffer'),
+    path('edit_offer/<int:id>/',views.edit_offer,name="edit_offer"),
     path('productoffer/<int:pk>',views.ProductOffer,name='ProductOffer'),
+    path('offer_toggle/<int:id>/',views.offer_toggle,name="offer_toggle"),
     path('offer/<int:pk>/',views.OfferByShop,name='offer'),
     path('offers/by-product/<int:product_id>/', views.OfferByProductView.as_view(), name='offer-by-product'),
     path('offers/by-shop/<int:shop_id>/', views.OfferByShopView.as_view(), name='offer-by-shop'),
@@ -32,5 +34,8 @@ urlpatterns = [
     path('getlocation/',views.LocationAPI.as_view(),name='getlocation'),
      path('shopsbymall/',views.shopsbymall,name='shopsbymall'),
      path('malls/',views.MallListView.as_view(),name="mallslist"),
-     path('recordImpression/',views.RecordImpression.as_view(),name="recordimpression")
+     path('recordimpression/',views.RecordImpression.as_view(),name="recordimpression"),
+
+
+     path('offer-impression-chart/', views.offer_impression_chart, name='offer_impression_chart'),
 ]

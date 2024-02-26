@@ -8,10 +8,10 @@ from django.contrib import messages
 from django.contrib import messages
 from rest_framework import generics
 from rest_framework.response import Response
-from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer,MallSerializer
+from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer,MallSerializer,OfferImpressionSerializer
 from django.db.models import F
 from rest_framework.views import APIView
-from .forms import ShopForm,ProductForm,MallForm
+from .forms import ShopForm,ProductForm,MallForm,OfferForm
 
 from .utils import calcdistance,getlocation
 
@@ -484,8 +484,8 @@ class OffersByLocation(APIView):
                 shop_list.append(shop_with_distance)
             sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
             selected_shop = sorted_shop_list[0]
-            offers = Offer.objects.filter(offeredby_id=selected_shop['id']).select_related('product','offeredby')
-
+            offers = Offer.objects.filter(offeredby_id=selected_shop['id'],is_valid=True).select_related('product','offeredby')
+            print(offers)
             offers_list = []
             for offer in offers:
                 offer_obj = {}
@@ -548,15 +548,52 @@ class OffersByLocation(APIView):
             return Response(response_data)
         
 
-class RecordImpression(APIView):
-
-    def post(self,request,*args,**kwargs):
-        print(request.data)
-        return Response(data={
-            'status':'OK'
-        })
+class RecordImpression(generics.CreateAPIView):
+    serializer_class = OfferImpressionSerializer
 
 
 
+from django.db.models.functions import ExtractHour
+from django.db.models import Count
+
+def offer_impression_chart(request):
+    # Query to aggregate impressions by hour
+    impressions_by_hour = OfferImpression.objects.annotate(hour=ExtractHour('timestamp')).values('hour').annotate(count=Count('id')).order_by('hour')
+    print(impressions_by_hour)
+    # labels = [f'{hour}:00 - {hour + 1}:00' for hour in range(24)]
+    # data = [impression['count'] if impression['hour'] in [point.hour for point in impressions_by_hour] else 0 for impression in impressions_by_hour]
+    labels=None
+    data=None
+    return JsonResponse({'labels': labels, 'data': data}, safe=False)
+
+# def offer_impression_chart(request):
+#     impressions = OfferImpression.objects.all()
+#     labels = [impression.timestamp.strftime('%Y-%m-%d %H:%M:%S') for impression in impressions]
+#     data = list(range(1, len(labels) + 1))
+
+#     return JsonResponse({'labels': labels, 'data': data}, safe=False)
 
 
+def edit_offer(request,id):
+    offer  = Offer.objects.get(id=id)
+    form = OfferForm(instance=offer)
+    if request.method == "POST":
+        form = OfferForm(request.POST,instance=offer)
+        if form.is_valid():
+            form.save()
+            return redirect(f"/productoffer/{offer.product_id}")
+    context = {
+        'form':form
+    }
+    return render(request,'edit_offer.html',context)
+
+def offer_toggle(request,id):
+    offer  = Offer.objects.get(id=id)
+    if offer.is_valid == True:
+        offer.is_valid = False
+        offer.save()
+        return redirect(f"/productoffer/{offer.product_id}")
+    else:
+        offer.is_valid = True
+        offer.save()
+        return redirect(f"/productoffer/{offer.product_id}")

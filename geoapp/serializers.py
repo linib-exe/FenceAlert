@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Offer,Product,Mall,Shop
+from .models import Offer,Product,Mall,Shop,OfferImpression
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -40,4 +40,10 @@ class MallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mall
         fields = '__all__'
+
+class OfferImpressionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferImpression
+        fields = '__all__'
+        # exclude = ['timestamp']
     

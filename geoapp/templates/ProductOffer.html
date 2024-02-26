@@ -16,6 +16,8 @@
                             <th class="py-2 px-3 text-left">S.No.</th>
                             <th class="py-2 px-3 text-left">Title</th>
                             <th class="py-2 px-3 text-left">Price</th>
+                            <th class="py-2 px-3 text-left">Valid</th>
+                            <th class="py-2 px-3 text-left">Actions</th>
                              <!-- New column for Actions -->
                         </tr>
                     </thead>
@@ -25,6 +27,12 @@
                                 <td class="py-2 px-3">{{ forloop.counter }}</td>
                                 <td class="py-2 px-3">{{ offer.offerTitle }}</td>
                                 <td class="py-2 px-3">{{ offer.offerprice }}</td>
+                                <td class="py-2 px-3">{{ offer.is_valid }}</td>
+                                <td class="py-2 px-3">
+                                    <a class="bg-yellow-500 text-white px-4 py-2 rounded" href="{% url 'edit_offer' offer.id %}">Edit</a>
+                                    <a class="bg-blue-500 text-white px-4 py-2 rounded" href="{% url 'offer_toggle' offer.id %}">TOGGLE VALIDITY</a>
+                                    
+                                </td>
                                 
                                 
                             </tr>
@@ -32,6 +40,8 @@
                     </tbody>
                 </table>
             </div>
+
+            <a href="/" class="py-2 px-4 bg-blue-500 text-white mt-2">Go to Home</a>
 
     </div>
 {% endblock %}

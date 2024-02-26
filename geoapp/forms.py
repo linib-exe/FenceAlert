@@ -1,5 +1,13 @@
 from django.forms import ModelForm
-from .models import Shop,Product,Mall
+from .models import Shop,Product,Mall,Offer
+
+class OfferForm(ModelForm):
+    class Meta:
+        fields = '__all__'
+        exclude = ['product','is_valid']
+        model = Offer
+
+
 class ShopForm(ModelForm):
     class Meta:
         fields = '__all__'

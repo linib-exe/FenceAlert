@@ -143,7 +143,59 @@ const shopData = {
         createShopChart('shop1', shopData.shop1);
     createShopChart('shop2', shopData.shop2);
     createShopChart('shop3', shopData.shop3);
+
+
+
+
+
+
+    
       </script>
+
+
+<canvas id="impressionChart" width="400" height="200"></canvas>
+
+
+<script>
+    // Fetch data from the Django backend
+    fetch('/offer-impression-chart/')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('impressionChart').getContext('2d');
+
+            // Create the chart
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Impression Count',
+                        data: data.data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        }],
+                        y: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+</script>
+
+
+
             <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">{{request.user.shop}}</h1>
 
             <!-- Add New Product Button for non-superusers -->
