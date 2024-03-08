@@ -38,11 +38,11 @@ def home(request):
         products = Product.objects.filter(productOwner = shop)
         products_count = products.count()
         offers = Offer.objects.filter(offeredby = shop)
-        offer_impression = OfferImpression.objects.filter(offer__offeredby=shop)
-        impression_count =offer_impression.filter(status='tap').count()
+        offer_impressions = OfferImpression.objects.filter(offer__offeredby=shop).select_related('offer').order_by('-id')
+        impression_count =offer_impressions.filter(status='tap').count()
         offers_count = offers.count()
         print(offers)
-        return render(request,'home.html',{'products':products,'products_count':products_count,'offers_count':offers_count,'impression_count':impression_count})
+        return render(request,'home.html',{'products':products,'products_count':products_count,'offers_count':offers_count,'impression_count':impression_count,'offer_impressions':offer_impressions})
 
 
 

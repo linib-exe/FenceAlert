@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="container mx-auto p-8">
+    <h2 class="text-2xl font-bold mb-4">Offer Impressions</h2>
+
+    <table class="min-w-full bg-white border border-gray-300">
+      <thead>
+        <tr>
+          <th class="py-2 px-4 border-b">Offer</th>
+          <th class="py-2 px-4 border-b">Timestamp</th>
+          <th class="py-2 px-4 border-b">Status</th>
+          <th class="py-2 px-4 border-b">User Device</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for impression in offer_impressions %}
+          <tr>
+            <td class="py-2 px-4 border-b">{{ impression.offer }}</td>
+            <td class="py-2 px-4 border-b">{{ impression.timestamp }}</td>
+            <td class="py-2 px-4 border-b">{{ impression.status }}</td>
+            <td class="py-2 px-4 border-b">{{ impression.userdevice }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
