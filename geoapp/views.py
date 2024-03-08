@@ -21,14 +21,56 @@ def pingPage(request):
 @login_required(login_url='login')
 def home(request):
     if request.user.is_superuser:
+        malls = Mall.objects.all()
         shops = Shop.objects.all()
-        return render(request,'home.html',{'shops': shops})
+        malls_count = malls.count()
+        shops_count = shops.count()
+        return render(request,'home.html',{'shops': shops,'malls_count':malls_count,'shops_count':shops_count})
+    elif request.user.is_staff:
+        user = request.user
+        mall  = Mall.objects.get(mall_admin = user)
+        shops = Shop.objects.filter(mall=mall)
+        shops_count = shops.count()
+        return render(request,'home.html',{'mall':mall,'shops': shops,'shops_count':shops_count})
     else:
         user = request.user 
         shop = Shop.objects.get(user = user)
         products = Product.objects.filter(productOwner = shop)
-        return render(request,'home.html',{'products':products})
+        products_count = products.count()
+        offers = Offer.objects.filter(offeredby = shop)
+        offer_impression = OfferImpression.objects.filter(offer__offeredby=shop)
+        impression_count =offer_impression.filter(status='tap').count()
+        offers_count = offers.count()
+        print(offers)
+        return render(request,'home.html',{'products':products,'products_count':products_count,'offers_count':offers_count,'impression_count':impression_count})
 
+
+
+
+
+
+from django.db.models.functions import ExtractHour
+from django.db.models import Count
+
+@login_required(login_url='login')
+def offer_impression_chart(request):
+    shop = request.user.shop
+    offer_impression = OfferImpression.objects.filter(offer__offeredby=shop)
+    print(offer_impression)
+    dismissed_count =offer_impression.filter(status='dismissed').count()
+    tapped_count =offer_impression.filter(status='tap').count()
+    received_count =offer_impression.filter(status='received').count()
+    print(dismissed_count,tapped_count,received_count)
+    
+    
+    # Query to aggregate impressions by hour
+    impressions_by_hour = OfferImpression.objects.annotate(hour=ExtractHour('timestamp')).values('hour').annotate(count=Count('id')).order_by('hour')
+    print(impressions_by_hour)
+    # labels = [f'{hour}:00 - {hour + 1}:00' for hour in range(24)]
+    # data = [impression['count'] if impression['hour'] in [point.hour for point in impressions_by_hour] else 0 for impression in impressions_by_hour]
+    labels=['Notifications Received','Notification Tapped',"Notification Dismissed"]
+    data=[received_count,tapped_count,dismissed_count]
+    return JsonResponse({'labels': labels, 'data': data}, safe=False)
 
 def listMall(request):
     malls = Mall.objects.all()
@@ -45,6 +87,8 @@ def viewMall(request,mall_id):
         'shops':shops
     }
     return render(request,'mall/viewmall.html',context)
+
+@login_required(login_url='login')
 def createMall(request):
     form = MallForm()
     if request.method == "POST":
@@ -55,8 +99,68 @@ def createMall(request):
     context = {'form':form}
     return render(request,'mall/createmall.html',context)
 
+@login_required(login_url='login')
+def editmall(request,mall_id):
+    if not request.user.is_staff:
+        return redirect('/')
+    mall = Mall.objects.get(id=mall_id)
+    form = MallForm(instance=mall)
+    if request.method == "POST":
+        form = MallForm(request.POST,instance=mall)
+        if form.is_valid():
+            form.save()
+            if request.user.is_staff:
+                return redirect('/')
+            return redirect('listmall')
+    context = {'form':form}
+    return render(request,'mall/editmall.html',context)
+
+@login_required(login_url='login')
+def deletemall(request,mall_id):
+    if not request.user.is_staff:
+        return redirect('/')
+    mall = Mall.objects.get(id=mall_id)
+    form = MallForm(instance=mall)
+    if request.method == "POST":
+        mall.delete()
+        if request.user.is_superuser:
+            return redirect('listmall')
+        return redirect('/')
+        
+    context = {'mall':mall}
+    return render(request,'mall/deletemall.html',context)
 
 
+
+
+def addmalladmin(request,mall_id):
+    if request.method == "POST":
+        username = request.POST.get('Username')
+        password = request.POST.get('Password')
+        if username !=" " and password != "": 
+            if not User.objects.filter(username=username).exists():
+                user = User(username = username,is_staff=True)
+                user.set_password(password)
+                user.save()
+                if user:
+                    mall=Mall.objects.get(id=mall_id)
+                    mall.mall_admin = user
+                    mall.save()
+                
+                    messages.success(request,'mallAdmin Added')
+                    return redirect('listmall')
+            else:
+                    messages.success(request,'Username already taken')
+    else:
+        messages.success(request,'Fill username or email')
+
+    mall = Mall.objects.get(id=mall_id)
+
+    context = {
+        'mall':mall
+
+    }
+    return render(request,'mall/addmalladmin.html',context)
 def addshopbymall(request,mall_id):
     
     if request.method == 'POST':
@@ -131,7 +235,7 @@ class LocationAPI(APIView):
 
 @login_required(login_url='login')
 def createshop(request):
-    if request.user.is_superuser:
+    if request.user.is_staff:
         # form = ShopForm()
         if request.method == 'POST':
             shopName = request.POST.get('shopName')
@@ -162,7 +266,7 @@ def createshop(request):
 
 @login_required(login_url='login')
 def deleteshop(request,pk):
-    if request.user.is_superuser:
+    if request.user.is_staff:
         shop = Shop.objects.get(pk = pk)
         shop.delete()
         return redirect('home')
@@ -227,11 +331,15 @@ def editproduct(request,id):
     }
     return render(request,'editproduct.html',context)
 
+@login_required(login_url='login')
 def deleteproduct(request,id):
     product = Product.objects.get(id=id)
     product.delete()
     return redirect('home')
 
+
+
+@login_required(login_url='login')
 def shopDetail(request,pk): 
     if request.user.is_superuser:
         
@@ -244,7 +352,7 @@ def shopDetail(request,pk):
         
 @login_required(login_url='login')
 def editshop(request,pk):
-    if request.user.is_superuser:
+    if request.user.is_staff:
         shop = Shop.objects.get(pk = pk)
         if request.method == 'POST':
             shop.shopName = request.POST.get('shopName')
@@ -285,7 +393,7 @@ def logoutuser(request):
     return redirect('home')
 
 
-
+@login_required(login_url='login')
 def createOffer(request,pk): 
     if request.method == "POST":
         title = request.POST.get('offerTitle')
@@ -305,13 +413,13 @@ def createOffer(request,pk):
 
     return render(request,'createOffer.html',)
 
-
+@login_required(login_url='login')
 def ProductOffer(request,pk):
     product = Product.objects.get(pk = pk)
     offers = Offer.objects.filter(product = product)
     return render(request,'ProductOffer.html',{'offers':offers,'product':product})
 
-
+@login_required(login_url='login')
 def OfferByShop(request,pk): 
     shop = Shop.objects.get(pk = pk)
     offers = Offer.objects.filter(shop = shop)
@@ -433,12 +541,16 @@ class ShopByLocation(APIView):
 
             return Response(serializer.data)
 
-        
+
+def getNearestShopsOffer():
+    shop_list = []
+
 class OffersByLocation(APIView):
     def get(self, request, *args, **kwargs):
         latitude = request.query_params.get('latitude', None)
         longitude = request.query_params.get('longitude', None)
-        if latitude is not None and longitude is not None:
+        nearest = request.query_params.get('nearest',None)
+        if latitude is not None and longitude is not None and nearest is None:
             print('Longitude: ',longitude,'Longitude: ',latitude)
 
             user_lat = latitude
@@ -508,9 +620,48 @@ class OffersByLocation(APIView):
             return Response(response_data)
 
         #TODO:
+        elif latitude is not None and longitude is not None and nearest is not None :
+            user_lat = latitude
+            user_lon = longitude
+            shops = Shop.objects.all()
+            shop_list = []
+            
+            for shop in shops:
+                distance = calcdistance(user_lat,user_lon,shop.latitude,shop.longitude)
+                shop_with_distance = {}
+                shop_with_distance['id'] = shop.id
+                shop_with_distance['shopName'] = shop.shopName
+                shop_with_distance['shopContact'] = shop.shopContact
+                shop_with_distance['shopOwner'] = shop.shopOwner
+                shop_with_distance['distance'] = distance
+                shop_list.append(shop_with_distance)
+            sorted_shop_list = sorted(shop_list, key=lambda x: float(x['distance']))
+            selected_shop = sorted_shop_list[0]
+
+            offers = Offer.objects.filter(offeredby_id=selected_shop['id'],is_valid=True).select_related('product','offeredby')
+
+            offers_list = []
+            for offer in offers:
+                offer_obj = {}
+                offer_obj['id'] = offer.id
+                offer_obj['productName'] = offer.product.productName
+                offer_obj['offerTitle'] = offer.offerTitle
+                offer_obj['offerPrice'] = offer.offerprice
+                offer_obj['originalPrice'] = offer.product.productPrice
+                offer_obj['shopName'] = offer.offeredby.shopName
+                offer_obj['productImage'] = offer.product.productImage
+
+                offers_list.append(offer_obj)
+
+            serializer = CustomOfferSerializer(offers_list,many=True)
+            response_data = {}
+            response_data['status'] = 'OK'
+            response_data['message'] = "USING Nearest Flag"
+            response_data['offers'] = serializer.data
+            return Response(response_data)
         else:
-            user_lat = "26.797206"
-            user_lon = "87.291943"
+            user_lat = '26.797206'
+            user_lon = '87.291943'
             shops = Shop.objects.all()
             shop_list = []
             
@@ -546,25 +697,13 @@ class OffersByLocation(APIView):
             response_data['message'] = "USING DEFALUT LAT LONG"
             response_data['offers'] = serializer.data
             return Response(response_data)
-        
+
 
 class RecordImpression(generics.CreateAPIView):
     serializer_class = OfferImpressionSerializer
 
 
 
-from django.db.models.functions import ExtractHour
-from django.db.models import Count
-
-def offer_impression_chart(request):
-    # Query to aggregate impressions by hour
-    impressions_by_hour = OfferImpression.objects.annotate(hour=ExtractHour('timestamp')).values('hour').annotate(count=Count('id')).order_by('hour')
-    print(impressions_by_hour)
-    # labels = [f'{hour}:00 - {hour + 1}:00' for hour in range(24)]
-    # data = [impression['count'] if impression['hour'] in [point.hour for point in impressions_by_hour] else 0 for impression in impressions_by_hour]
-    labels=None
-    data=None
-    return JsonResponse({'labels': labels, 'data': data}, safe=False)
 
 # def offer_impression_chart(request):
 #     impressions = OfferImpression.objects.all()

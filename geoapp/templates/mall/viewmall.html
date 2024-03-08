@@ -32,7 +32,12 @@
           </div>
     
         <!-- Back Button (Optional) -->
+        {% if request.user.is_superuser %}
         <a href="{% url 'listmall' %}" class="text-blue-500 hover:underline">Back to Mall List</a>
+        {% else %}
+        <a href="/" class="text-blue-500 hover:underline">Back to Home</a>
+
+        {% endif %}
     </div>
 
 

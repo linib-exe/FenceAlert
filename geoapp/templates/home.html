@@ -4,8 +4,81 @@
 {% block content %}
     <div class="container mx-auto mt-8 p-8 bg-white rounded-lg shadow-lg">
         {% if request.user.is_superuser %}
+        <div class="container mx-auto mt-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <!-- Total Products Card -->
+                <div class="bg-blue-500 p-6 rounded-lg shadow-lg text-white">
+                    <div class="flex items-center">
+                        <span class="mr-4">
+                            <i class="fa-solid fa-building fa-2x"></i>
+                            <!-- <i class="fas fa-box fa-2x"></i> -->
+                        </span>
+                        <div>
+                            <p class="text-lg font-semibold">Total Malls</p>
+                            <p class="text-3xl font-bold">{{malls_count}}</p>
+                        </div>
+                    </div>
+                </div>
+          
+                <!-- Total Offers Card -->
+                <div class="bg-green-500 p-6 rounded-lg shadow-lg text-white">
+                    <div class="flex items-center">
+                        <span class="mr-4">
+                          
+                            <i class="fa-solid fa-shop fa-2x"></i>
+                        </span>
+                        <div>
+                            <p class="text-lg font-semibold">Total Shops</p>
+                            <p class="text-3xl font-bold">{{shops_count}}</p>
+                        </div>
+                    </div>
+                </div>
+          
+                <!-- Impressions Card -->
+                <!-- <div class="bg-yellow-500 p-6 rounded-lg shadow-lg text-white">
+                    <div class="flex items-center">
+                        <span class="mr-4">
+                            <i class="fas fa-eye fa-2x"></i>
+                        </span>
+                        <div>
+                            <p class="text-lg font-semibold">Total Products</p>
+                            <p class="text-3xl font-bold">{{pro}}</p>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+          </div>
+          <br>
         <a href="{% url 'listmall' %}" class="px-4 py-2 bg-red-500 rounded-xl text-white">Manage Malls</a>
-            <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">Shop Details</h1>
+            
+            </div>
+
+        {% elif request.user.is_staff %}
+
+        <div class="container mx-auto p-8">
+            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+              <h2 class="text-2xl font-bold mb-4">Mall Information</h2>
+              <p><strong>Mall Name:</strong> {{mall.mallName}}</p>
+              <p><strong>Address:</strong> {{mall.mallAddress}}</p>
+              <p><strong>No of Shops:</strong>{{mall.shops.all.count}}</p>
+              <p><strong>Mall Radius:</strong> {{mall.fence_radius}} M</p>
+            </div>
+        
+            <div class="mb-4">
+
+            <a class="bg-green-500 text-white px-4 py-2 rounded" href="{% url 'addshopbymall' mall.id %}">
+                
+                <i class="fas fa-plus-circle mr-2"></i>
+                Add Shop</a>
+
+           
+                <a class="bg-red-500 text-white px-4 py-2 rounded" href="{% url 'viewmall' mall.id %}"><i class="fas fa-map mr-2"></i> View Mall</a>
+                <a href="{% url 'editmall' mall.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded"><i class="fas fa-pencil mr-2"></i>Edit Mall</a>
+              <!-- Add more buttons for other actions as needed -->
+            </div>
+          </div>
+
+        <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">Shops in {{mall}}</h1>
 
             <!-- Add New Shop Button -->
             <!-- <button
@@ -46,14 +119,54 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
         {% else %}
             <div>
 
             </div>
 
-
-
+            <div class="container mx-auto mt-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <!-- Total Products Card -->
+                    <div class="bg-blue-500 p-6 rounded-lg shadow-lg text-white">
+                        <div class="flex items-center">
+                            <span class="mr-4">
+                                <i class="fas fa-box fa-2x"></i>
+                            </span>
+                            <div>
+                                <p class="text-lg font-semibold">Total Products</p>
+                                <p class="text-3xl font-bold">{{products_count}}</p>
+                            </div>
+                        </div>
+                    </div>
+              
+                    <!-- Total Offers Card -->
+                    <div class="bg-green-500 p-6 rounded-lg shadow-lg text-white">
+                        <div class="flex items-center">
+                            <span class="mr-4">
+                                <i class="fas fa-gift fa-2x"></i>
+                            </span>
+                            <div>
+                                <p class="text-lg font-semibold">Total Offers</p>
+                                <p class="text-3xl font-bold">{{offers_count}}</p>
+                            </div>
+                        </div>
+                    </div>
+              
+                    <!-- Impressions Card -->
+                    <div class="bg-yellow-500 p-6 rounded-lg shadow-lg text-white">
+                        <div class="flex items-center">
+                            <span class="mr-4">
+                                <i class="fas fa-eye fa-2x"></i>
+                            </span>
+                            <div>
+                                <p class="text-lg font-semibold">Impressions</p>
+                                <p class="text-3xl font-bold">{{impression_count}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+{%comment%}
 
             <div class="container mx-auto mt-10">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -72,6 +185,8 @@
                     </div>
                 </div>
             </div>
+
+            {%endcomment%}
       
       
       <script>
@@ -140,9 +255,9 @@ const shopData = {
 
 
 
-        createShopChart('shop1', shopData.shop1);
-    createShopChart('shop2', shopData.shop2);
-    createShopChart('shop3', shopData.shop3);
+    //     createShopChart('shop1', shopData.shop1);
+    // createShopChart('shop2', shopData.shop2);
+    // createShopChart('shop3', shopData.shop3);
 
 
 
@@ -152,8 +267,11 @@ const shopData = {
     
       </script>
 
-
-<canvas id="impressionChart" width="400" height="200"></canvas>
+<div class=" p-6 rounded-lg shadow-lg text-black">
+    <h2 class="text-xl  font-bold mb-4">{{request.user.shop}}' Offers Analytics</h2>
+    <canvas id="impressionChart" width="400" height="200"></canvas>
+</div>
+<!-- <canvas id="impressionChart" width="400" height="200"></canvas> -->
 
 
 <script>
@@ -165,24 +283,39 @@ const shopData = {
 
             // Create the chart
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
+                    label:"Count",
                     labels: data.labels,
                     datasets: [{
-                        label: 'Impression Count',
+                        backgroundColor: [
+          'rgba(255, 99, 132, 0.5)',
+          'rgba(54, 162, 235, 0.5)',
+          'rgba(255, 206, 86, 0.5)',
+          'rgba(75, 192, 192, 0.5)'
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)'
+        ],
+                        // label: 'Analytics',
                         data: data.data,
-                        borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
                     }]
                 },
                 options: {
+                    legend:{
+                        display:false,
+                    },
                     scales: {
-                        x: [{
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            }
-                        }],
+                        // x: [{
+                        //     type: 'time',
+                        //     time: {
+                        //         unit: 'day'
+                        //     }
+                        // }],
                         y: [{
                             ticks: {
                                 beginAtZero: true

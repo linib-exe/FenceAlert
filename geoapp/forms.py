@@ -4,7 +4,7 @@ from .models import Shop,Product,Mall,Offer
 class OfferForm(ModelForm):
     class Meta:
         fields = '__all__'
-        exclude = ['product','is_valid']
+        exclude = ['product','is_valid','detail_exp_count','dismissed_count','received_count']
         model = Offer
 
 
@@ -24,4 +24,5 @@ class ProductForm(ModelForm):
 class MallForm(ModelForm):
     class Meta:
         fields = '__all__'
+        exclude =['mall_admin']
         model = Mall

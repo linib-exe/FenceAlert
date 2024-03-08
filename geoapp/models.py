@@ -8,6 +8,7 @@ class Mall(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     fence_radius = models.FloatField(default=500,help_text="Fence Radius in meters(m)") # in meters
+    mall_admin = models.OneToOneField(User,on_delete=models.CASCADE,null=True,blank=True,related_name="mall")
     def __str__(self):
         return self.mallName
 
@@ -46,6 +47,9 @@ class Offer(models.Model):
     offerTitle = models.CharField(max_length = 500,blank = True,null = True)
     offerprice = models.FloatField()
     is_valid = models.BooleanField(default = False,null = True,blank = True)
+    detail_exp_count = models.IntegerField(null=True,default=0)
+    dismissed_count = models.IntegerField(null=True,default=0)
+    received_count = models.IntegerField(null=True,default=0)
 
 
 class OfferImpression(models.Model):

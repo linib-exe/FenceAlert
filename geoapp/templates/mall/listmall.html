@@ -4,7 +4,7 @@
 {% block content %}
 
 
-
+{% comment %}
 <div class="container mx-auto mt-10">
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       <!-- Total Products Card -->
@@ -47,6 +47,7 @@
       </div>
   </div>
 </div>
+{% endcomment %}
 <h1 class="text-xl font-bold text-center">LIST MALLS IN THE SYSTEM</h1>
 <div class="container mx-auto">
     <a href="{% url 'createmall' %}" class="px-4 py-2 text-white bg-blue-500 rounded-xl">Create Mall</a>
@@ -60,6 +61,8 @@
           <th class="py-2 px-4 border-b">Fence Radius</th>
           <th class="py-2 px-4 border-b">Mall Address</th>
           <th class="py-2 px-4 border-b">No of Shops</th>
+          <th class="py-2 px-4 border-b">Mall Admin</th>
+          
           <th class="py-2 px-4 border-b">Actions</th>
         </tr>
       </thead>
@@ -75,12 +78,19 @@
           <td class="py-2 px-4 border-b">{{mall.mallAddress}}</td>
           <td class="py-2 px-4 border-b">{{mall.shops.count}}</td>
           <td class="py-2 px-4 border-b">
+            {% if mall.mall_admin %}
+            {{mall.mall_admin}}
+            {% else %}
+            <a class="bg-green-500 text-white px-4 py-2 rounded" href="{% url 'addmalladmin' mall.id %}">Add MallAdmin</a>
+            {%endif%}
+          </td>
+          <td class="py-2 px-4 border-b">
             <!-- Add your action buttons or links here -->
-            <a class="bg-green-500 text-white px-4 py-2 rounded" href="{% url 'addshopbymall' mall.id %}">Add Shop</a>
-            <a class="bg-red-500 text-white px-4 py-2 rounded" href="{% url 'viewmall' mall.id %}">View Mall</a>
+            <!-- <a class="bg-green-500 text-white px-4 py-2 rounded" href="{% url 'addshopbymall' mall.id %}">Add Shop</a> -->
+            <a class="bg-blue-500 text-white px-4 py-2 rounded" href="{% url 'viewmall' mall.id %}">View Mall</a>
 
-            <button class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
-            <button class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+            <a href="{% url 'editmall' mall.id %}" class="bg-yellow-500 text-white px-4 py-2 rounded">Edit</a>
+            <a href="{% url 'deletemall' mall.id %}" class="bg-red-500 text-white px-4 py-2 rounded">Delete</a>
           </td>
         </tr>
         {% endfor %}

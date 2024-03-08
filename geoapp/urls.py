@@ -28,6 +28,9 @@ urlpatterns = [
 
 
     path('createmall/',views.createMall,name='createmall'),
+    path('editmall/<mall_id>/',views.editmall,name='editmall'),
+    path('deletemall/<mall_id>/',views.deletemall,name='deletemall'),
+    path('addmalladmin/<int:mall_id>/',views.addmalladmin,name="addmalladmin"),
     path('viewmall/<int:mall_id>/',views.viewMall,name="viewmall"),
     path('listmall/',views.listMall,name='listmall'),
     path('addshopbymall/<int:mall_id>/',views.addshopbymall,name='addshopbymall'),
