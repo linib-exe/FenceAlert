@@ -1,4 +1,4 @@
-# Web App for SVM Based AI Quiz System
+# Web App for Geolocation Based Offer Recommendation
 
 ## Description
 
