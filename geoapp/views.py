@@ -10,6 +10,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import OfferSerializer,CustomShopSerializer,CustomOfferSerializer,MallSerializer,OfferImpressionSerializer
 from django.db.models import F
+import random
 from rest_framework.views import APIView
 from .forms import ShopForm,ProductForm,MallForm,OfferForm
 
@@ -598,8 +599,19 @@ class OffersByLocation(APIView):
             selected_shop = sorted_shop_list[0]
             offers = Offer.objects.filter(offeredby_id=selected_shop['id'],is_valid=True).select_related('product','offeredby')
             print(offers)
+            
+
             offers_list = []
-            for offer in offers:
+            all_offers = list(offers)  # Convert queryset to a list for random sampling
+
+            # Ensure that the number of offers to select is at most 5 or the total number of offers
+            num_offers_to_select = min(len(all_offers), 5)
+
+            # Select at most 5 offers randomly
+            # selected_offers = random.sample(all_offers, num_offers_to_select)
+            selected_offers = offers[:num_offers_to_select]
+
+            for offer in selected_offers:
                 offer_obj = {}
                 offer_obj['id'] = offer.id
                 offer_obj['productName'] = offer.product.productName

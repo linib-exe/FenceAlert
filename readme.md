@@ -71,6 +71,10 @@ python manage.py runserver 0.0.0.0:8000
 ifconfig
 ```
 
+```bash
+ipconfig
+```
+
 ## SCREENSHOTS
 
 <!-- ![Login Page](./screenshots/login.png) -->
